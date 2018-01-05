@@ -953,9 +953,9 @@ if __name__ == "__main__":
     #takeAction("BTC", "XMR", "BCN")
     #newMain()
     arrCurrencyls = [[["DASH", "LTC", "NXT", "ZEC"],["USDT","XMR"],["USDT_XMR"]], 
-                  [["ETC", "REP", "ZEC", "BCH"],["USDT","ETH"],["USDT_ETH.txt"]],
-                  [["DASH", "LTC", "NXT", "STR", "XMR", "XRP", "ETH", "ETC", "REP", "ZEC", "BCH"],["USDT","BTC"],["USDT_BTC.txt"]],
-                  [["BCN", "BLK", "BTCD", "DASH", "LTC", "MAID", "NXT", "ZEC"],["BTC","XMR"],["BTC_XMR.txt"]]]
+                  [["ETC", "REP", "ZEC", "BCH"],["USDT","ETH"],["USDT_ETH"]],
+                  [["DASH", "LTC", "NXT", "STR", "XMR", "XRP", "ETH", "ETC", "REP", "ZEC", "BCH"],["USDT","BTC"],["USDT_BTC"]],
+                  [["BCN", "BLK", "BTCD", "DASH", "LTC", "MAID", "NXT", "ZEC"],["BTC","XMR"],["BTC_XMR"]]]
 
     for u in arrCurrencyls:
         for a in u[0]:
