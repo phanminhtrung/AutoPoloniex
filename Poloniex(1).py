@@ -902,6 +902,7 @@ def takeActionCurrency(mainCurrency1, mainCurrency2, currency, budget1,budget2,l
                         else:
                             if response["resultingTrades"] != []:
                                 loginf = loginf+"'status'':'Excellent'"
+                                print (loginf+"}",file=open("Excellent.txt", "a"))
                             else:
                                 loginf = loginf+"'status'':'NOT OK3'"
                     else:
