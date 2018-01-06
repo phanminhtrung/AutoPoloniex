@@ -64,7 +64,7 @@ class poloniex:
         else:
             #print("vo dc authen api")
             req['command'] = command
-            req['nonce'] = int(time.time()*1000) + 1513957255461465
+            req['nonce'] = int(time.time()*1000) + 9176125713076442143
             post_data = urllib.parse.urlencode(req).encode('utf-8')
             sign = hmac.new(self.Secret, post_data, hashlib.sha512).hexdigest() 
             headers = {
@@ -86,6 +86,9 @@ class poloniex:
             elif status_code == 200:
                 jsontopython = json.loads(response.text)
                 #print("Lenh gui di thanh cong")  
+                return self.post_process(jsontopython)
+            else:
+                jsontopython = json.loads(response.text)
                 return self.post_process(jsontopython)
             
         
@@ -143,7 +146,7 @@ class poloniex:
     # Outputs:
     # orderNumber   The order number
     def buy(self,currencyPair,rate,amount):
-        return self.api_query('buy',{"currencyPair":currencyPair,"rate":rate,"amount":amount, "fillOrKill":"1"})
+        return self.api_query('buy',{"currencyPair":currencyPair,"rate":rate,"amount":amount, "fillOrKill":"0"})
  
     # Places a sell order in a given market. Required POST parameters are "currencyPair", "rate", and "amount". If successful, the method will return the order number.
     # Inputs:
@@ -878,8 +881,8 @@ def takeActionCurrency(mainCurrency1, mainCurrency2, currency, budget1,budget2,l
     amountFee3 = amount3*0.0015
     lastAmount = amount3 - amountFee3
     gap = (float(thirdPairBid)-crossrate)*100/crossrate
-    loginf= (loginf+ "'CrossRate':"+str(gap)+"','"+
-             "'lastAmount':"+str(lastAmount)+"',\n  '"+
+    loginf= (loginf+ "CrossRate':"+str(gap)+"','"+
+             "LastAmount':"+str(lastAmount)+"',\n  '"+
             firstPair+"':{'Ask':'"+str(firstPairAsk)+"','Volume':'"+str(firstPairVolume)+"','Amount':'"+str(amount1)+"','AmountFee':'"+str(amountFee1)+"'},\n   '"+
             secondPair+"':{'Ask':'"+str(secondPairAsk)+"','Volume':'"+str(secondPairVolume)+"','Amount':'"+str(amount2)+"','AmountFee':'"+str(amountFee2)+"'},\n    '"+
             thirdPair+"':{'Bid':'"+str(thirdPairBid)+"','Volume':'"+str(thirdPairVolume)+"','Amount':'"+str(amount3)+"','AmountFee':'"+str(amountFee3)+"'},\n   ")
@@ -888,31 +891,31 @@ def takeActionCurrency(mainCurrency1, mainCurrency2, currency, budget1,budget2,l
         #Kiem Tra Volume
         response = polo.buy(firstPair,firstPairAsk,amount1)
         if 'error' in response:
-            loginf = loginf+",'errorOrder1':'"+str(response)+"','status':'NOT OK1'"
+            loginf = loginf+",'errorOrder1':'"+str(response)+"','Status':'NOT OK1'"
         else:
             if response["resultingTrades"] != []:
-                response= polo.buy(secondPair,secondPairAsk,amountFee2)
+                response= polo.buy(secondPair,secondPairAsk,amount2)
                 if 'error' in response:
-                    loginf = loginf+",'errorOrder2':'"+str(response)+"','status':'NOT OK2'"
+                    loginf = loginf+",'errorOrder2':'"+str(response)+"','Status':'NOT OK2'"
                 else:
                     if response["resultingTrades"] != []:                  
-                        response= polo.sell(thirdPair,thirdPairBid,amountFee3)
+                        response= polo.sell(thirdPair,thirdPairBid,amount3)
                         if 'error' in response:
-                            loginf = loginf+",'errorOrder3':'"+str(response)+"','status':'NOT OK3'"
+                            loginf = loginf+",'errorOrder3':'"+str(response)+"','Status':'NOT OK3'"
                         else:
                             if response["resultingTrades"] != []:
-                                loginf = loginf+"'status'':'Excellent'"
+                                loginf = loginf+"'Status':'Excellent'"
                                 print (loginf+"}",file=open("Excellent.txt", "a"))
                             else:
-                                loginf = loginf+"'status'':'NOT OK3'"
+                                loginf = loginf+"'Status':'NOT OK3'"
                     else:
-                        loginf = loginf+"'status'':'NOT OK2'"
+                        loginf = loginf+"'Status':'NOT OK2'"
             else:
-                loginf = loginf+"'status'':'NOT OK1'"
+                loginf = loginf+"'Status':'NOT OK1'"
     else:
-        loginf = loginf+"'status'':'NOT OK'"
-    return loginf
-
+        logfile = "logfile_notOK.txt"
+        loginf = loginf+"'Status':'NOT OK'"
+    return [loginf,logfile]
 def runMain(arrls1,arrls2,arrls3):
     monitorTime = 1
     #kiem tra toan bo tai khoan
@@ -931,10 +934,10 @@ def runMain(arrls1,arrls2,arrls3):
     while True:           
         #print ("###### START MONITORING EXCHANGE - NUMBER ", monitorTime, " - ", currentDT, " ##########")
         currentDT = datetime.datetime.now()
-        loginfo = "'"+str(monitorTime)+ "':{\n 'date':'"+str(currentDT)+"','"
-        loginfo= takeActionCurrency(main1, main2, currency, budget_USDT,budget_BTC,logfile,loginfo) +","
+        loginfo = "'"+ arrls3[0] + "_"+ currency+"':{\n 'Index':'"+str(monitorTime)+"','date':'"+str(currentDT)+"','"
+        log= takeActionCurrency(main1, main2, currency, budget_USDT,budget_BTC,logfile,loginfo)
         monitorTime = monitorTime + 1
-        print (loginfo+"}",file=open(logfile, "a"))
+        print (log[0]+"},",file=open(log[1], "a"))
     
 
 if __name__ == "__main__":
@@ -942,8 +945,7 @@ if __name__ == "__main__":
     #APIKey =  "VU5GUAS6-RCPZC9TQ-N3A7QCLR-YNBAQ3CB"
     #Secret =  b"ce8a55fff14004bab10e3321065778c09a330fc45ac8cdfa25574007fc3e2cda1e8ce8bbc1ad928031df22b551d1d3116e22268b1b141b6c080890316b573fa5"
     
-    APIKey = "3OXYWWJV-1QVCU07U-7J7PP208-M2NAI4FB"
-    Secret = b"fdae7c033f437c0b17d62f77be74d3e08b96ff99184ac29cbd763001d0dd3f5615cfe27abddd89863c54cf1f380b820e5fd249f4da8a135028e47bff8850210f"
+
     polo= poloniex(APIKey,Secret)
     #allBalance = polo.returnBalances()
     #print(allBalance["USDT"])
